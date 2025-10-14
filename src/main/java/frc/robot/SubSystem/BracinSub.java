@@ -46,6 +46,7 @@ public class BracinSub extends SubsystemBase {
   Encoder IntakeEncoder = new Encoder (2, 3, false, Encoder.EncodingType.k4X);
   EncoderSim armEncoderSim = new EncoderSim(armEncoder);
   EncoderSim intakeEncoderSim = new EncoderSim(IntakeEncoder);
+  
   //encoder do Motor(Braço):
     private final RelativeEncoder armSparkEncoder = armMotor.getEncoder();
   //encoder do Motor(Intake):
@@ -53,25 +54,13 @@ public class BracinSub extends SubsystemBase {
   //Razão de redução do Braço:
     private static final double ARMGEAR_RATIO = 100.0;
 
-    double massKg = 9.15;
-    double gearRatio = 100.0;
-    double motorStallNm = 2.6;
-    double gearboxEff = 0.9;
-    double batteryV = 12.0;
-    double g = 9.81;
-
-    double ks = 0.21;
-    double kg = 0.86;
-    double kv = 2.15;
-    double ka = 0;
-
-    ArmFeedforward feedforward = new ArmFeedforward(ks, kg, kv, ka);
+    ArmFeedforward feedforward = new ArmFeedforward(Constants.ks,Constants.kg, Constants.kv, Constants.ka);
 
     PIDController ArmController = new PIDController(0.001, 0.00001,0.0005);
     double ArmOutPut;
 
 
-    public final double posSubino = (90 / 360) * ARMGEAR_RATIO;
+    public final double posSubino = (90 / Constants.GrausMax) * ARMGEAR_RATIO;
     public final double posDesceno = 0;
 
     private final LoggedMechanism2d mech = new LoggedMechanism2d(0.7, 0.5);
@@ -88,7 +77,7 @@ public class BracinSub extends SubsystemBase {
     armEncoder.setDistancePerPulse(1.0 / ARMGEAR_RATIO);
     IntakeEncoder.setDistancePerPulse(1.0 / ARMGEAR_RATIO);
 
-    ArmController.setTolerance(0.01);
+    ArmController.setTolerance(Constants.tolerancia);
   }
   
   public void AcertaOCantoAi(double setpointRotations) {
@@ -96,7 +85,7 @@ public class BracinSub extends SubsystemBase {
        double posicaoAtual = armSparkEncoder.getPosition();
 
     
-       if (Math.abs(setpointRotations - posicaoAtual) < 0.01) {
+       if (Math.abs(setpointRotations - posicaoAtual) < Constants.tolerancia) {
            armMotor.setVoltage(
                feedforward.calculate(Math.toRadians(getArmAngleDegrees()), 0)
            );
@@ -105,15 +94,25 @@ public class BracinSub extends SubsystemBase {
 
     double pidOutput = ArmController.calculate(posicaoAtual, setpointRotations);
 
-    double anguloAlvoRad = Math.toRadians((setpointRotations / ARMGEAR_RATIO) * 360.0);
+    double anguloAlvoRad = Math.toRadians((setpointRotations / ARMGEAR_RATIO) * Constants.GrausMax);
     double feedforwardOutput = feedforward.calculate(anguloAlvoRad, 0); // (angulo, velocidade)
 
 
     double totalVoltage = pidOutput + feedforwardOutput;
-    totalVoltage = MathUtil.clamp(totalVoltage, -12.0, 12.0); // Garante que não passe de 12V
+    totalVoltage = MathUtil.clamp(totalVoltage, Constants.MinVoltage, Constants.MaxVoltage); // Garante que não passe de 12V
 
 
     armMotor.setVoltage(totalVoltage);
+
+    if (RobotBase.isSimulation()){
+      Logger.recordOutput("Arm/PID/SetpointRotations", setpointRotations);
+      Logger.recordOutput("Arm/PID/PositionRotations", posicaoAtual);
+      Logger.recordOutput("Arm/PID/Error", setpointRotations - posicaoAtual);
+      Logger.recordOutput("Arm/PID/OutputVolts", pidOutput);
+      Logger.recordOutput("Arm/TotalVoltage", totalVoltage);
+      Logger.recordOutput("Arm/AngleDegrees", getArmAngleDegrees());
+
+    }
 }
 
   public void IrPraUmCantoAi(){
@@ -130,7 +129,7 @@ public class BracinSub extends SubsystemBase {
   }
 
   public double getArmAngleDegrees() {
-    return (armSparkEncoder.getPosition() / ARMGEAR_RATIO) * 360.0;
+    return (armSparkEncoder.getPosition() / ARMGEAR_RATIO) * Constants.GrausMax;
 }
 
   public void MexePruLado() {
@@ -168,9 +167,9 @@ public class BracinSub extends SubsystemBase {
 
       intakeEncoderSim.getDistance();
       armEncoderSim.getDistance(); 
-      double armAngleDeg = armEncoder.getDistance() * 360.0; // em graus
+      double armAngleDeg = armEncoder.getDistance() * Constants.GrausMax; // em graus
       armLig.setAngle(armAngleDeg);
-      double intakeAngleDeg = IntakeEncoder.getDistance() * 360.0;
+      double intakeAngleDeg = IntakeEncoder.getDistance() * Constants.GrausMax;
       intakeLig.setAngle(intakeAngleDeg);
       
       double armAngleRad = armEncoder.getDistance() * 2 * Math.PI; 
@@ -181,7 +180,7 @@ public class BracinSub extends SubsystemBase {
   
   
       Logger.recordOutput("Arm/VelocityTicksPerSec", armEncoder.getRate());
-  
+      Logger.recordOutput("Arm/VelocityPerTicksPerSecPID", armSparkEncoder.getVelocity() / 60.0 * ARMGEAR_RATIO);
   
       Logger.recordOutput("Arm/AppliedOutput", armMotor.getAppliedOutput());
   
@@ -189,6 +188,9 @@ public class BracinSub extends SubsystemBase {
       Logger.recordOutput("Intake/AppliedOutput", intakeMotor.getAppliedOutput());
       Logger.recordOutput("Intake/PositionTicks", IntakeEncoder.getDistance());
 
+      Logger.recordOutput("Arm/PID/kP", ArmController.getP());
+      Logger.recordOutput("Arm/PID/kI", ArmController.getI());
+      Logger.recordOutput("Arm/PID/kD", ArmController.getD());
   }
 
   @Override

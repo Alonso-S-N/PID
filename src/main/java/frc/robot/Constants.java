@@ -33,4 +33,19 @@ public final class Constants {
   public static double autonomousBraceta = 3.0;
   public static int m_Intake = 6;
   public static double targetArea = 5.0;
+  public static  double massKg = 7.75;
+  public static double gearRatio = 100.0;
+  public static double motorStallNm = 2.6;
+  public static double gearboxEff = 0.9;
+  public static double batteryV = 12.0;
+  public static double tolerancia = 0.01;
+  public static double GrausMax = 360.0;
+  public static double MaxVoltage = 12;
+  public static double MinVoltage = -12;
+  
+  public static double g = 9.81;
+  public static double ks = 0.21;
+  public static double kg = 0.86;
+  public static double kv = 2.15;
+  public static double ka = 0;
 }
