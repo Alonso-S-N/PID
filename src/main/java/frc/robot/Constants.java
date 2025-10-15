@@ -40,8 +40,8 @@ public final class Constants {
   public static double batteryV = 12.0;
   public static double tolerancia = 0.01;
   public static double GrausMax = 360.0;
-  public static double MaxVoltage = 12;
-  public static double MinVoltage = -12;
+  public static double MaxVoltage = 6;
+  public static double MinVoltage = -6;
   
   public static double g = 9.81;
   public static double ks = 0.21;
