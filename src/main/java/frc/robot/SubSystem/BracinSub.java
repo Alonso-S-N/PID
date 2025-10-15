@@ -40,7 +40,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 public class BracinSub extends SubsystemBase {
 
 //Encoders de simulação:
-  public final SparkMax armMotor = new SparkMax(Constants.m_Bracin, MotorType.kBrushless);
+  public final SparkMax armMotor = new SparkMax(Constants.m_Bracin, MotorType.kBrushless);]
   public final SparkMax intakeMotor = new SparkMax(Constants.m_Intake, MotorType.kBrushless);
   Encoder armEncoder = new Encoder (0, 1, false, Encoder.EncodingType.k4X);
   Encoder IntakeEncoder = new Encoder (2, 3, false, Encoder.EncodingType.k4X);
@@ -72,11 +72,13 @@ public class BracinSub extends SubsystemBase {
 
 
   public BracinSub() {
+    armMotor.setIdleMode(com.revrobotics.spark.SparkLowLevel.IdleMode.kBrake);
+    armMotor.setOpenLoopRampRate(0.5)
     armSparkEncoder.setPosition(0);
     intakeSparkEncoder.setPosition(0);
     armEncoder.setDistancePerPulse(1.0 / ARMGEAR_RATIO);
     IntakeEncoder.setDistancePerPulse(1.0 / ARMGEAR_RATIO);
-
+    
     ArmController.setTolerance(Constants.tolerancia);
   }
   
