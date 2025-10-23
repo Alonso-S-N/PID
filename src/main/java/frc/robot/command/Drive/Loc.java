@@ -1,6 +1,4 @@
 package frc.robot.command.Drive;
-
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;

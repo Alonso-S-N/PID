@@ -36,7 +36,7 @@ import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnFie
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeProcessorSimulation;
 import org.littletonrobotics.junction.Logger;
-import org.w3c.dom.Entity;
+
 
   public class Drive extends SubsystemBase {
     private final Field2d field = new Field2d();
@@ -50,10 +50,10 @@ import org.w3c.dom.Entity;
     private double simYaw = 0.0;
     private final  Arena2025Reefscape arena = new Arena2025Reefscape();
     
-    private final WPI_VictorSPX m_leftLeader  = new WPI_VictorSPX(Constants.LMot);
-    private final WPI_VictorSPX m_rightLeader = new WPI_VictorSPX(Constants.RMot);
-    private final WPI_VictorSPX m_leftFollower  = new WPI_VictorSPX(Constants.LMot2);
-    private final WPI_VictorSPX m_rightFollower = new WPI_VictorSPX(Constants.RMot2);
+    //private final WPI_VictorSPX m_leftLeader  = new WPI_VictorSPX(Constants.LMot);
+    //private final WPI_VictorSPX m_rightLeader = new WPI_VictorSPX(Constants.RMot);
+    //private final WPI_VictorSPX m_leftFollower  = new WPI_VictorSPX(Constants.LMot2);
+    //private final WPI_VictorSPX m_rightFollower = new WPI_VictorSPX(Constants.RMot2);
     
     public final Encoder leftEncoder = new Encoder(4, 5, false, Encoder.EncodingType.k4X);
     private final Encoder rightEncoder = new Encoder(6, 7, true, Encoder.EncodingType.k4X);
@@ -95,7 +95,6 @@ import org.w3c.dom.Entity;
           SimulatedArena.overrideInstance(arena);
 
        SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralOnField(
-    // We must specify a heading since the coral is a tube
     new Pose2d(2, 2, Rotation2d.fromDegrees(90))));
 
      SimulatedArena.getInstance().addGamePiece(new ReefscapeAlgaeOnField(new Translation2d(2,2)));
@@ -110,21 +109,19 @@ import org.w3c.dom.Entity;
     public void simulationPeriodic() {
       if (driveSim != null) {
         // aplica tensões (motores [-1..1] -> volts)
-        driveSim.setInputs(m_leftLeader.get() * 12.0, m_rightLeader.get() * 12.0);
+       // driveSim.setInputs(m_leftLeader.get() * 12.0, m_rightLeader.get() * 12.0);
     
         // atualiza modelo físico (20ms)
         driveSim.update(0.02);
 
         double distancePerPulse = (Math.PI * diametroRoda)/2048;
     
-        // alimenta os simuladores de encoder com POSIÇÃO (metros) e velocidade (m/s)
         leftEncoderSim.setDistance(driveSim.getLeftPositionMeters());
         rightEncoderSim.setDistance(driveSim.getRightPositionMeters());
         leftEncoderSim.setRate(driveSim.getLeftVelocityMetersPerSecond());
         rightEncoderSim.setRate(driveSim.getRightVelocityMetersPerSecond());
     
         gyroSim.setAngle(driveSim.getHeading().getDegrees());
-  
         
       }
     }
@@ -171,19 +168,19 @@ import org.w3c.dom.Entity;
 
     public void reqDrive() {
       resetOdometry(getPose());
-      m_leftFollower.follow(m_leftLeader);
-      m_rightFollower.follow(m_rightLeader);
+     // m_leftFollower.follow(m_leftLeader);
+     // m_rightFollower.follow(m_rightLeader);
 
-      m_rightLeader.setInverted(true);
-      m_leftLeader.setInverted(false);
+      //m_rightLeader.setInverted(true);
+      //m_leftLeader.setInverted(false);
 
-      m_leftFollower.setInverted(InvertType.FollowMaster);
-      m_rightFollower.setInverted(InvertType.FollowMaster);
+     // m_leftFollower.setInverted(InvertType.FollowMaster);
+     // m_rightFollower.setInverted(InvertType.FollowMaster);
 
-      m_leftLeader.setNeutralMode(NeutralMode.Brake);
-      m_leftFollower.setNeutralMode(NeutralMode.Brake);
-      m_rightLeader.setNeutralMode(NeutralMode.Brake);
-      m_rightFollower.setNeutralMode(NeutralMode.Brake);
+      //m_leftLeader.setNeutralMode(NeutralMode.Brake);
+      //m_leftFollower.setNeutralMode(NeutralMode.Brake);
+      //m_rightLeader.setNeutralMode(NeutralMode.Brake);
+      //m_rightFollower.setNeutralMode(NeutralMode.Brake);
 
       double distancePerPulse = (Math.PI * diametroRoda) / 2048;
       leftEncoder.setDistancePerPulse(distancePerPulse);
@@ -191,15 +188,15 @@ import org.w3c.dom.Entity;
     }
 
     public void rawTank(double left, double right) {
-      m_leftLeader.set(left);
-      m_rightLeader.set(right);
+      //m_leftLeader.set(left);
+      //m_rightLeader.set(right);
 
-      Logger.recordOutput("Drive/LeftSetpoint", left);
-      Logger.recordOutput("Drive/RightSetpoint", right);
+     // Logger.recordOutput("Drive/LeftSetpoint", left);
+     // Logger.recordOutput("Drive/RightSetpoint", right);
     }
 
     public void stop() {
-      m_leftLeader.stopMotor();
-      m_rightLeader.stopMotor();
+      //m_leftLeader.stopMotor();
+      //m_rightLeader.stopMotor();
     }
   }

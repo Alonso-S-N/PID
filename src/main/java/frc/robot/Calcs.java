@@ -79,7 +79,6 @@ public class Calcs {
        }
 
        return new DriveSpeeds(rapidao,rapidao2);
-
     }
 
     public static DriveSpeeds calculateTriggerDrive(Joystick joyDeliciu, double B_Speed) {

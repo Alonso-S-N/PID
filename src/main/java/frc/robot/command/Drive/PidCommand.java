@@ -15,16 +15,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class PidCommand extends Command {
   private final BracinSub braceta;
-  private final double ANgulinQnoisQuer = Constants.angulinMax;
-  private final double ANgulinQnoisQuer2 = Constants.angulinMin;
   private Boolean YPressed = false;
-  private double Contagem;
+  private boolean indoPraCima = false;
+  private boolean ParouOBracin = false;
+  private boolean Xpressed = false;
   
-    private Joystick joyDeliciu = new Joystick(0);
+    private Joystick joyDelicioso = new Joystick(Constants.JoyDelicioso);
     
-      public PidCommand(BracinSub braceta, Joystick joyDeliciu) {
+      public PidCommand(BracinSub braceta,Joystick joyDelicioso) {
        this.braceta = braceta;
-       this.joyDeliciu = joyDeliciu;
+       this.joyDelicioso = joyDelicioso;
      addRequirements(braceta);
     }
   
@@ -34,64 +34,97 @@ public class PidCommand extends Command {
     }
   
     public void mexerBracinSlk(){
-    if (joyDeliciu.getRawAxis(Constants.RT) > 0.1){
+    if (joyDelicioso.getRawAxis(Constants.RT) > 0.1){
       braceta.MexePruLado();
-    } else if (joyDeliciu.getRawAxis(Constants.LT) > 0.1){
+    } else if (joyDelicioso.getRawAxis(Constants.LT) > 0.1){
       braceta.MexePruOutro();
     } else {
       braceta.StopBraceta();
     }
-     //if (joyDeliciu.getRawButton(Constants.RB)){
+     //if (joyDelicioso.getRawButton(Constants.RB)){
        // braceta.MexePru(ANgulinQnoisQuer);
-     // } else if (joyDeliciu.getRawButton(Constants.LB)){
+     // } else if (joyDelicioso.getRawButton(Constants.LB)){
        // braceta.MexePru(ANgulinQnoisQuer2);
       //}  
     }
   
     public void mexerIntakeSlk(){
-      if (joyDeliciu.getRawButton(Constants.RB)){
+      if (joyDelicioso.getRawButton(Constants.RB)){
         braceta.Pegar();
-      } else if (joyDeliciu.getRawButton(Constants.LB)){
+      } else if (joyDelicioso.getRawButton(Constants.LB)){
         braceta.Cuspir();
       } else {
-        braceta.stopIntake();
+        braceta.stopExtensor();
       }
     }
   
     public void MexerComPIDSLK(){
-      if (YPressed == true){
-        if (braceta.GetArmPose() < braceta.posSubino){
-        braceta.IrPraUmCantoAi();
-      } else if (braceta.GetArmPose() > braceta.posDesceno){
-        braceta.VoltarProOutroCantoAi();
-      }
+      if (YPressed){
+        braceta.AcertaOCantoAi(braceta.posSubino);  
+        if (braceta.ArmController.atSetpoint()){
+        braceta.MoveTo(braceta.posIntakeExtend);
+      }        
+      } else if (Xpressed){ 
+        braceta.MoveTo(braceta.posIntakeRetract);
+        if (braceta.ExtensorController.atSetpoint()){
+        braceta.AcertaOCantoAi(braceta.posDesceno);
+    }
   }
 }
 
-  public void ButtonYgetPressed(){
-    if (joyDeliciu.getRawButtonPressed(Constants.y)){
-      YPressed = !YPressed;
+   public void ButtonYgetPressed(){ 
+    if (joyDelicioso.getRawButtonPressed(Constants.y)){
+       YPressed = true; 
+       } 
+     }
+
+    public void buttonXgetPressed(){
+      if (joyDelicioso.getRawButtonPressed(Constants.x)){
+        Xpressed = true;
+        YPressed = false;
+        
+        }
+    }
+
+
+  public void StopBraceta(){
+    if (joyDelicioso.getRawButtonPressed(Constants.b)){
+      ParouOBracin = !ParouOBracin;
+    braceta.StopBraceta();
+    YPressed = false; // Cancela o modo PID
+    Xpressed = false; // Cancela o modo PID
+    braceta.ArmController.reset();
+    braceta.ExtensorController.reset();
+    }
   }
-}
+
   
   @Override
   public void execute() {
-    joyDeliciu.getRawButton(Constants.RB);
-    joyDeliciu.getRawButton(Constants.LB);
-    joyDeliciu.getRawAxis(Constants.RT);
-    joyDeliciu.getRawAxis(Constants.LT);
-    joyDeliciu.getRawButton(Constants.y);
+    joyDelicioso.getRawButton(Constants.RB);
+    joyDelicioso.getRawButton(Constants.LB);
+    joyDelicioso.getRawAxis(Constants.RT);
+    joyDelicioso.getRawAxis(Constants.LT);
+    joyDelicioso.getRawButton(Constants.y);
+    joyDelicioso.getRawButton(Constants.b);
+    joyDelicioso.getRawButton(Constants.x);
+
 
    ButtonYgetPressed();
+   buttonXgetPressed();
+   StopBraceta();
+   
+   if (Xpressed || YPressed){
+    MexerComPIDSLK();
+   }else {
    mexerBracinSlk();
    mexerIntakeSlk();
-   MexerComPIDSLK();
+   }
 
    SmartDashboard.putNumber("velocidade Braceta", braceta.armMotor.getAppliedOutput());
-   SmartDashboard.putNumber("velocidade Intake", braceta.intakeMotor.getAppliedOutput());
-   SmartDashboard.putBoolean("Button Y", joyDeliciu.getRawButton(Constants.y));
+   SmartDashboard.putNumber("velocidade Intake", braceta.ExtensorMotor.getAppliedOutput());
+   SmartDashboard.putBoolean("Button Y", joyDelicioso.getRawButton(Constants.y));
    SmartDashboard.putBoolean("Y Pressed", YPressed);
-   SmartDashboard.putNumber("Contagem", Contagem );
   }
 
 

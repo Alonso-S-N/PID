@@ -4,48 +4,15 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.SubSystem.Drive;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.Encoder;
-
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
-import org.dyn4j.dynamics.Body;
-import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.geometry.Convex;
-import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.MassType;
-import org.dyn4j.world.PhysicsWorld;
-import org.dyn4j.world.World;
 import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.drivesims.AbstractDriveTrainSimulation;
-import org.ironmaple.simulation.gamepieces.GamePiece;
-import org.ironmaple.simulation.gamepieces.GamePieceOnFieldSimulation;
-import org.ironmaple.simulation.gamepieces.GamePieceProjectile;
-import org.ironmaple.simulation.motorsims.SimulatedBattery;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.Arena2025Reefscape;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnField;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
-import org.ironmaple.utils.mathutils.GeometryConvertor;
-
-
-
-
-
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in

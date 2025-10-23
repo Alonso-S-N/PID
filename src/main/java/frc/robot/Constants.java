@@ -38,10 +38,12 @@ public final class Constants {
   public static double motorStallNm = 2.6;
   public static double gearboxEff = 0.9;
   public static double batteryV = 12.0;
-  public static double tolerancia = 0.01;
+  public static double tolerancia = 0.05;
   public static double GrausMax = 360.0;
-  public static double MaxVoltage = 6;
-  public static double MinVoltage = -6;
+  public static double MaxVoltage = 12;
+  public static double MinVoltage = -12;
+  public static final double MAX_EXTENSION_METERS = 0.6;
+  public static final int JoyDelicioso = 1;
   
   public static double g = 9.81;
   public static double ks = 0.21;

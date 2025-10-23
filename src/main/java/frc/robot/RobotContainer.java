@@ -19,6 +19,7 @@ public class RobotContainer {
 
   // Input
   public final Joystick joyDeliciu = new Joystick(Constants.joy);
+  public final Joystick JoyDelicioso = new Joystick(Constants.JoyDelicioso);
 
   // Commands
   private final Loc locCommand;
@@ -31,9 +32,9 @@ public class RobotContainer {
   
   private final BracinSub baby = new BracinSub();
 
-  public RobotContainer() {
+  public RobotContainer() { 
 
-    Pdiddy = new PidCommand(baby,joyDeliciu);
+    Pdiddy = new PidCommand(baby,JoyDelicioso);
 
     CommandScheduler.getInstance().registerSubsystem(driveSubsystem);
 

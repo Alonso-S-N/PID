@@ -1,22 +1,12 @@
 package frc.robot.SubSystem;
 
-
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-import java.io.IOException;
-
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -51,24 +41,24 @@ public class Vision extends SubsystemBase {
                     limelight = NetworkTableInstance.getDefault().getTable("limelight-front");
 
                  
-                    cameraProp.setCalibration(640, 480, Rotation2d.fromDegrees(100));   
-                    cameraProp.setCalibError(0.25, 0.08);
-                    cameraProp.setFPS(60);
-                    cameraProp.setAvgLatencyMs(35);
-                    cameraProp.setLatencyStdDevMs(5);
+                    //cameraProp.setCalibration(640, 480, Rotation2d.fromDegrees(100));   
+                    //cameraProp.setCalibError(0.25, 0.08);
+                    //cameraProp.setFPS(60);
+                    //cameraProp.setAvgLatencyMs(35);
+                    //cameraProp.setLatencyStdDevMs(5);
 
-                    Translation3d robotToCameraTrl = new Translation3d(0.6, 0.3, 0.5);
-                    Rotation3d robotToCameraRot = new Rotation3d(0, Math.toRadians(-15), 0);
-                    Transform3d robotToCamera = new Transform3d(robotToCameraTrl, robotToCameraRot);
+                    //Translation3d robotToCameraTrl = new Translation3d(0.6, 0.3, 0.5);
+                    //Rotation3d robotToCameraRot = new Rotation3d(0, Math.toRadians(-15), 0);
+                    //Transform3d robotToCamera = new Transform3d(robotToCameraTrl, robotToCameraRot);
 
-                    AprilTagFieldLayout tagLayout;
-                    try {
-                        tagLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.kDefaultField.m_resourceFile);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        tagLayout = null; 
-                    }    
-                    visionSim.addAprilTags(tagLayout);
+                   // AprilTagFieldLayout tagLayout;
+                    //try {
+                       // tagLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.kDefaultField.m_resourceFile);
+                    //} catch (IOException e) {
+                       // e.printStackTrace();
+                       // tagLayout = null; 
+                   // }    
+                    //visionSim.addAprilTags(tagLayout);
                    
         }
     
@@ -100,7 +90,7 @@ public class Vision extends SubsystemBase {
         Logger.recordOutput("Limelight/ta", ta);
         Logger.recordOutput("Limelight/tv", tv);
       
-        visionSim.getDebugField();
+        //visionSim.getDebugField();
     }
  }
 

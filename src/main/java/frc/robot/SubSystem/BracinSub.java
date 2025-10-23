@@ -40,8 +40,8 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 public class BracinSub extends SubsystemBase {
 
 //Encoders de simulação:
-  public final SparkMax armMotor = new SparkMax(Constants.m_Bracin, MotorType.kBrushless);]
-  public final SparkMax intakeMotor = new SparkMax(Constants.m_Intake, MotorType.kBrushless);
+  public final SparkMax armMotor = new SparkMax(Constants.m_Bracin, MotorType.kBrushless);
+  public final SparkMax ExtensorMotor = new SparkMax(Constants.m_Intake, MotorType.kBrushless);
   Encoder armEncoder = new Encoder (0, 1, false, Encoder.EncodingType.k4X);
   Encoder IntakeEncoder = new Encoder (2, 3, false, Encoder.EncodingType.k4X);
   EncoderSim armEncoderSim = new EncoderSim(armEncoder);
@@ -50,42 +50,62 @@ public class BracinSub extends SubsystemBase {
   //encoder do Motor(Braço):
     private final RelativeEncoder armSparkEncoder = armMotor.getEncoder();
   //encoder do Motor(Intake):
-    private final RelativeEncoder intakeSparkEncoder = intakeMotor.getEncoder();
+    private final RelativeEncoder intakeSparkEncoder = ExtensorMotor.getEncoder();
   //Razão de redução do Braço:
     private static final double ARMGEAR_RATIO = 100.0;
-
-    ArmFeedforward feedforward = new ArmFeedforward(Constants.ks,Constants.kg, Constants.kv, Constants.ka);
-
-    PIDController ArmController = new PIDController(0.001, 0.00001,0.0005);
-    double ArmOutPut;
-
-
-    public final double posSubino = (90 / Constants.GrausMax) * ARMGEAR_RATIO;
-    public final double posDesceno = 0;
-
-    private final LoggedMechanism2d mech = new LoggedMechanism2d(0.7, 0.5);
-    private final LoggedMechanismRoot2d base = mech.getRoot("Base", 0.6, 0.7);
-    private final LoggedMechanismLigament2d armLig = base.append(
-        new LoggedMechanismLigament2d("Arm", 0.5, 90,10,new Color8Bit(192,192,192)));
-    private final LoggedMechanismLigament2d intakeLig = armLig.append(
-        new LoggedMechanismLigament2d("Intake", 0.3, 90,5,new Color8Bit(255,0,0)));
-
-
-  public BracinSub() {
-    armMotor.setIdleMode(com.revrobotics.spark.SparkLowLevel.IdleMode.kBrake);
-    armMotor.setOpenLoopRampRate(0.5)
-    armSparkEncoder.setPosition(0);
-    intakeSparkEncoder.setPosition(0);
-    armEncoder.setDistancePerPulse(1.0 / ARMGEAR_RATIO);
-    IntakeEncoder.setDistancePerPulse(1.0 / ARMGEAR_RATIO);
+  
     
-    ArmController.setTolerance(Constants.tolerancia);
+        ArmFeedforward feedforward = new ArmFeedforward(Constants.ks,Constants.kg, Constants.kv, Constants.ka);
+    
+        public PIDController ExtensorController = new PIDController(0.001, 0.0,0.0);
+    
+        public PIDController ArmController = new PIDController(0.32, 0.0,0.005);
+        double ArmOutPut;
+    
+        //PosBraçoPid
+        public final double posSubino = (104 / Constants.GrausMax) * ARMGEAR_RATIO;
+        public final double posDesceno = (-10 / Constants.GrausMax) * ARMGEAR_RATIO;
+        
+        //Razão de extensão do Intake:
+        public final double ExtendPerRotate = Constants.MAX_EXTENSION_METERS/45.0; //metros por rotação do motor
+    
+        //PosExtensorIntakePid: 
+        public final double posIntakeExtend = 0.40; //em rotações do motor
+        public final double posIntakeRetract = -0; //em rotações do motor
+    
+        private final LoggedMechanism2d mech = new LoggedMechanism2d(0.7, 0.5);
+        private final LoggedMechanismRoot2d base = mech.getRoot("Base", 0.6, 0.7);
+        private final LoggedMechanismLigament2d armLig = base.append(
+            new LoggedMechanismLigament2d("Arm", 0.5, 90,10,new Color8Bit(192,192,192)));
+        private final LoggedMechanismLigament2d intakeLig = armLig.append(
+            new LoggedMechanismLigament2d("Intake", 0.3, 90,5,new Color8Bit(255,0,0)));
+    
+    
+      public BracinSub() {
+        armSparkEncoder.setPosition(0);
+        intakeSparkEncoder.setPosition(0);
+        armEncoder.setDistancePerPulse(1.0 / ARMGEAR_RATIO);
+        IntakeEncoder.setDistancePerPulse(1.0 / ARMGEAR_RATIO);
+    
+        ArmController.setTolerance(Constants.tolerancia);
+        ExtensorController.setTolerance(Constants.tolerancia);
+      }
+    
+      public void MoveTo(double setpointExtensor){
+        setpointExtensor = MathUtil.clamp(setpointExtensor, 0.0,Constants.MAX_EXTENSION_METERS);
+
+     double posicaoAtual = getExtensorPosition();
+    
+     double pidOutput = ExtensorController.calculate(posicaoAtual, setpointExtensor);
+     double clampedOutput = MathUtil.clamp(pidOutput, -0.5, 0.5);
+     
+      ExtensorMotor.set(clampedOutput);
+
   }
   
   public void AcertaOCantoAi(double setpointRotations) {
        // Posição atual do encoder
        double posicaoAtual = armSparkEncoder.getPosition();
-
     
        if (Math.abs(setpointRotations - posicaoAtual) < Constants.tolerancia) {
            armMotor.setVoltage(
@@ -113,7 +133,7 @@ public class BracinSub extends SubsystemBase {
       Logger.recordOutput("Arm/PID/OutputVolts", pidOutput);
       Logger.recordOutput("Arm/TotalVoltage", totalVoltage);
       Logger.recordOutput("Arm/AngleDegrees", getArmAngleDegrees());
-
+      SmartDashboard.putNumber("FFVoltage",totalVoltage);
     }
 }
 
@@ -123,6 +143,11 @@ public class BracinSub extends SubsystemBase {
   
   public void VoltarProOutroCantoAi(){
    AcertaOCantoAi(posDesceno);
+  }
+
+  public double getExtensorPosition(){
+    double pos = IntakeEncoder.getDistance() / ExtendPerRotate;
+    return pos;
   }
 
   public double GetArmPose(){
@@ -144,28 +169,29 @@ public class BracinSub extends SubsystemBase {
 
   public void StopBraceta(){
     armMotor.set(0.0);
+    ExtensorMotor.set(0.0);
   }
   
   public void Cuspir(){
-    intakeMotor.set(0.7);
+    ExtensorMotor.set(0.7);
   }
   public void Pegar(){
-    intakeMotor.set(-0.7);
+    ExtensorMotor.set(-0.7);
   }
-  public void stopIntake(){
-    intakeMotor.set(0.0);
+  public void stopExtensor(){
+    ExtensorMotor.set(0.0);
   }
 
   @Override
   public void simulationPeriodic() {
       double motorOut = armMotor.get();
-      double IntakeOut = intakeMotor.get();
+      double IntakeOut = ExtensorMotor.get();
       double simulateRate = IntakeOut * 5.0;
       double simulatedRate = motorOut * 5.0; 
       armEncoderSim.setRate(simulatedRate);
       armEncoderSim.setDistance(armEncoder.getDistance() + simulatedRate * 0.02);
       intakeEncoderSim.setRate(simulateRate);
-      intakeEncoderSim.setDistance(IntakeEncoder.getDistance() + simulateRate * 0.02);
+      intakeEncoderSim.setDistance(IntakeEncoder.getDistance() + (simulateRate * 0.02));
 
       intakeEncoderSim.getDistance();
       armEncoderSim.getDistance(); 
@@ -187,7 +213,7 @@ public class BracinSub extends SubsystemBase {
       Logger.recordOutput("Arm/AppliedOutput", armMotor.getAppliedOutput());
   
       // Intake
-      Logger.recordOutput("Intake/AppliedOutput", intakeMotor.getAppliedOutput());
+      Logger.recordOutput("Intake/AppliedOutput", ExtensorMotor.getAppliedOutput());
       Logger.recordOutput("Intake/PositionTicks", IntakeEncoder.getDistance());
 
       Logger.recordOutput("Arm/PID/kP", ArmController.getP());
@@ -197,6 +223,8 @@ public class BracinSub extends SubsystemBase {
 
   @Override
   public void periodic() {
-   
+   SmartDashboard.putNumber("Angulo/Braceta", getArmAngleDegrees());
+   SmartDashboard.putNumber("Posição/Braceta", armSparkEncoder.getPosition());
+   SmartDashboard.putNumber("Total Voltage/Braceta", armMotor.getAppliedOutput() * RobotController.getBatteryVoltage());
   }
 }
